@@ -1,0 +1,139 @@
+const loader = document.querySelector("#loader")
+const mainEl = document.querySelector("main")
+const today = new Date()
+const month = String(today.getMonth() + 1).padStart(2, "0")
+const day = String(today.getDate()).padStart(2, "0")
+const imageUrl = "https://apis.scrimba.com/unsplash/photos/random?orientation=landscape&query=nature"
+const cryptoUrl = "https://api.coingecko.com/api/v3/coins/dogecoin"
+const historyUrl = `https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/events/${month}/${day}`
+const weatherBaseUrl = "https://apis.scrimba.com/openweathermap/data/2.5/weather"
+
+function hideLoader() { loader.classList.add("hidden"); }
+
+function getPosition() {
+    return new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject)
+    })
+}
+
+function loadImage(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image()
+        img.onload = () => resolve(url)
+        img.onerror = reject
+        img.src = url
+    })
+}
+
+async function loadDashboard() {
+    try {
+        const imageFetch = fetch(imageUrl)
+        const cryptoFetch = fetch(cryptoUrl)
+        const historyFetch = fetch(historyUrl)
+        const positionPromise = getPosition()
+
+        const position = await positionPromise
+        const { latitude, longitude } = position.coords
+        const weatherFetch = fetch(`${weatherBaseUrl}?lat=${latitude}&lon=${longitude}&units=metric`
+        )
+
+        const [imageRes, cryptoRes, weatherRes, historyRes] = await Promise.all([
+            imageFetch,
+            cryptoFetch,
+            weatherFetch,
+            historyFetch
+        ])
+
+        if (!cryptoRes.ok) throw Error("Crypto data unavailable")
+        if (!weatherRes.ok) throw Error("Weather data unavailable")
+        if (!historyRes.ok) throw Error("history data unavailable")
+
+        let imageData
+        try {
+            imageData = await imageRes.json()
+            await loadImage(imageData.urls.regular)
+        } catch {
+            imageData = {
+                urls: {
+                    regular: "https://images.unsplash.com/photo-1458668383970-8ddd3927deed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxNDI0NzB8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzM1OTkzMjh8&ixlib=rb-4.1.0&q=80&w=1080"
+                },
+                user: {
+                    name: "samsommer",
+                    username: "samsommer"
+                }
+            }
+        }
+
+        const cryptoData = await cryptoRes.json()
+        const weatherData = await weatherRes.json()
+        const historyData = await historyRes.json()
+
+        render(imageData, cryptoData, weatherData, historyData)
+
+    } catch (err) {
+        console.error(err)
+    }
+    finally {
+        hideLoader();
+        mainEl.setAttribute("aria-hidden", "false")
+    }
+}
+
+function render(imageData, cryptoData, weatherData, historyData) {
+
+    document.body.style.backgroundImage = `url(${imageData.urls.regular})`
+
+    const author = document.getElementById("author")
+    author.href = `https://unsplash.com/@${imageData.user.username}`
+    author.textContent = `Image by: ${imageData.user.name}`
+    author.setAttribute("rel", "noopener noreferrer")
+    author.setAttribute("target", "_blank")
+
+    const innerCryptoContainer = document.getElementById("crypto-top")
+    innerCryptoContainer.textContent = ""
+    const img = document.createElement("img")
+    img.src = cryptoData.image.small
+    img.alt = "Selected crypto coin icon"
+    const span = document.createElement("span")
+    span.textContent = cryptoData.name
+    innerCryptoContainer.appendChild(img)
+    innerCryptoContainer.appendChild(span)
+
+    const outerCryptoContainer = document.getElementById("crypto")
+    const currentPrice = document.createElement("p")
+    currentPrice.textContent = `🎯: $${cryptoData.market_data.current_price.usd}`
+    const upperPrice = document.createElement("p")
+    upperPrice.textContent = `👆: $${cryptoData.market_data.high_24h.usd}`
+    const lowerPrice = document.createElement("p")
+    lowerPrice.textContent = `👇: $${cryptoData.market_data.low_24h.usd}`
+    outerCryptoContainer.append(currentPrice, upperPrice, lowerPrice)
+
+    const iconUrl = `https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`
+    const weatherContainer = document.getElementById("weather")
+    const weatherIcon = document.createElement("img")
+    weatherIcon.src = iconUrl
+    weatherIcon.alt = "Current weather icon"
+    const weatherTemp = document.createElement("p")
+    weatherTemp.textContent = Math.round(weatherData.main.temp) + "ºC"
+    weatherTemp.classList.add("weather-temp")
+    const weatherLocation = document.createElement("p")
+    weatherLocation.textContent = weatherData.name
+    weatherLocation.classList.add("weather-city")
+    weatherContainer.append(weatherIcon, weatherTemp, weatherLocation)
+
+    document.querySelector(".date").textContent = "On this day in: " + historyData.events[0].year
+    document.querySelector(".event").textContent = historyData.events[0].text
+
+    tick()
+}
+
+function tick() {
+    const now = new Date()
+    document.querySelector(".time").textContent =
+        now.toLocaleTimeString("en-us", { timeStyle: "medium" })
+
+    const delay = 1000 - (now.getMilliseconds())
+    setTimeout(tick, delay)
+}
+
+loadDashboard()

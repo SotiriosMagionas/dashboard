@@ -1,0 +1,15 @@
+{
+    "manifest_version": 3,
+    "name": "Personal Dashboard",
+    "version": "1.0.0",
+    "description": "Just for practicing async JS",
+    "action": {
+        "default_icon": "icon.png"
+    },
+    "chrome_url_overrides": {
+        "newtab": "index.html"
+    },
+    "content_security_policy": {
+        "extension_pages": "default-src 'self'; connect-src https://apis.scrimba.com https://api.coingecko.com https://api.wikimedia.org https://api.openweathermap.org; img-src 'self' https://images.unsplash.com https://openweathermap.org https://api.coingecko.com; script-src 'self'; style-src 'self';"
+    }
+}
