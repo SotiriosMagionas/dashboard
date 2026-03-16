@@ -1,43 +1,42 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8" lang="en-us" />
-        <link rel="stylesheet" href="index.css">
-        <title>Personal Dashboard</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-    </head>
 
-    <body>
-        <div id="loader" class="loader" role="status" aria-live="polite" aria-label="Loading dashboard data">
-            <div class="spinner"></div>
-            <p>Loading your dashboard…</p>
-        </div>
-        <main aria-hidden="true">
-            <section class="top">
-                <section id="crypto" aria-labelledby="crypto-heading">
-                    <h2 id="crypto-heading" class="sr-only">Crypto prices</h2>
-                    <div id="crypto-top"></div>
-                </section>
-                <section id="weather" aria-labelledby="weather-heading">
-                    <h2 id="weather-heading" class="sr-only">Live weather information</h2>
-                </section>
+<head>
+    <meta charset="UTF-8" lang="en-us" />
+    <link rel="stylesheet" href="index.css">
+    <title>Personal Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+
+<body>
+    <div id="loader" class="loader" role="status" aria-live="polite" aria-label="Loading dashboard data">
+        <div class="spinner"></div>
+        <p>Loading your dashboard…</p>
+    </div>
+    <main aria-hidden="true">
+        <section class="top">
+            <section id="crypto" aria-labelledby="crypto-heading">
+                <h2 id="crypto-heading" class="sr-only">Crypto prices</h2>
+                <div id="crypto-top"></div>
             </section>
-
-            <!-- <section id="time-section" aria-labelledby="time-heading">
-                
-            </section> -->
-            <p id="time-heading" class="sr-only">Current time in user's location</p>
-            <h1 id="time" class="time"></h1>
-
-            <section class="bottom">
-                <a id="author"></a>
-                <section class="history" aria-labelledby="event-heading">
-                    <h2 id="event-heading" class="sr-only">Key event that happened in the past on the same day as today</h2>
-                    <h2 class="date"></h2>
-                    <p class="event"></p>
-                </section>
+            <section id="weather" aria-labelledby="weather-heading">
+                <h2 id="weather-heading" class="sr-only">Live weather information</h2>
             </section>
-        </main>
-        <script src="index.js" type="module"></script>
-    </body>
+        </section>
+
+        <p id="time-heading" class="sr-only">Current time in user's location</p>
+        <h1 id="time" class="time"></h1>
+
+        <section class="bottom">
+            <a id="author"></a>
+            <section class="history" aria-labelledby="event-heading">
+                <h2 id="event-heading" class="sr-only">Key event that happened in the past on the same day as today</h2>
+                <h2 class="date"></h2>
+                <p class="event"></p>
+            </section>
+        </section>
+    </main>
+    <script src="index.js" type="module"></script>
+</body>
+
 </html>
