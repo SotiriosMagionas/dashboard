@@ -113,13 +113,16 @@ function render(imageData, cryptoData, weatherData, historyData) {
     const weatherIcon = document.createElement("img")
     weatherIcon.src = iconUrl
     weatherIcon.alt = "Current weather icon"
+    const weatherDesc = document.createElement("p")
+    weatherDesc.textContent = weatherData.weather[0].description;
+    weatherDesc.classList.add("sr-only")
     const weatherTemp = document.createElement("p")
     weatherTemp.textContent = Math.round(weatherData.main.temp) + "ºC"
     weatherTemp.classList.add("weather-temp")
     const weatherLocation = document.createElement("p")
     weatherLocation.textContent = weatherData.name
     weatherLocation.classList.add("weather-city")
-    weatherContainer.append(weatherIcon, weatherTemp, weatherLocation)
+    weatherContainer.append(weatherDesc, weatherIcon, weatherTemp, weatherLocation)
 
     document.querySelector(".date").textContent = "On this day in: " + historyData.events[0].year
     document.querySelector(".event").textContent = historyData.events[0].text
