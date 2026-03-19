@@ -1,3 +1,10 @@
+import {
+    getBackgroundPlaceholder,
+    getCryptoPlaceholder,
+    getWeatherPlaceholder,
+    getHistoryPlaceholder
+} from "./utility/placeholder.js"
+
 const loader = document.querySelector("#loader")
 const mainEl = document.querySelector("main")
 const today = new Date()
@@ -30,43 +37,40 @@ async function loadDashboard() {
         const imageFetch = fetch(imageUrl)
         const cryptoFetch = fetch(cryptoUrl)
         const historyFetch = fetch(historyUrl)
-        const positionPromise = getPosition()
 
+        const positionPromise = getPosition()
         const position = await positionPromise
         const { latitude, longitude } = position.coords
-        const weatherFetch = fetch(`${weatherBaseUrl}?lat=${latitude}&lon=${longitude}&units=metric`
-        )
+        const weatherFetch = fetch(`${weatherBaseUrl}?lat=${latitude}&lon=${longitude}&units=metric`)
 
-        const [imageRes, cryptoRes, weatherRes, historyRes] = await Promise.all([
+        const results = await Promise.allSettled([
             imageFetch,
             cryptoFetch,
             weatherFetch,
             historyFetch
         ])
 
-        if (!cryptoRes.ok) throw Error("Crypto data unavailable")
-        if (!weatherRes.ok) throw Error("Weather data unavailable")
-        if (!historyRes.ok) throw Error("history data unavailable")
+        const [imageRes, cryptoRes, weatherRes, historyRes] = results
 
-        let imageData
-        try {
-            imageData = await imageRes.json()
-            await loadImage(imageData.urls.regular)
-        } catch {
-            imageData = {
-                urls: {
-                    regular: "https://images.unsplash.com/photo-1458668383970-8ddd3927deed?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wxNDI0NzB8MHwxfHJhbmRvbXx8fHx8fHx8fDE3NzM1OTkzMjh8&ixlib=rb-4.1.0&q=80&w=1080"
-                },
-                user: {
-                    name: "samsommer",
-                    username: "samsommer"
-                }
-            }
-        }
+        const imageResOk = imageRes.status === "fulfilled" && imageRes.value.ok
 
-        const cryptoData = await cryptoRes.json()
-        const weatherData = await weatherRes.json()
-        const historyData = await historyRes.json()
+        const imageData = imageResOk
+            ? await imageRes.value.json()
+            : getBackgroundPlaceholder();
+
+        const cryptoData = (cryptoRes.status === "fulfilled" && cryptoRes.value.ok)
+            ? await cryptoRes.value.json()
+            : getCryptoPlaceholder();
+
+        const weatherData = (weatherRes.status === "fulfilled" && weatherRes.value.ok)
+            ? await weatherRes.value.json()
+            : getWeatherPlaceholder();
+
+        const historyData = (historyRes.status === "fulfilled" && historyRes.value.ok)
+            ? await historyRes.value.json()
+            : getHistoryPlaceholder();
+
+        if (imageResOk) await loadImage(await imageData.urls.regular)
 
         render(imageData, cryptoData, weatherData, historyData)
 
