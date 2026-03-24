@@ -87,10 +87,16 @@ async function loadDashboard() {
         const cryptoFetch = fetch(cryptoUrl)
         const historyFetch = fetch(historyUrl)
 
-        const positionPromise = getPosition()
-        const position = await positionPromise
-        const { latitude, longitude } = position.coords
-        const weatherFetch = fetch(`${weatherBaseUrl}?lat=${latitude}&lon=${longitude}&units=metric`)
+        let position = null
+        try {
+            position = await getPosition()
+        } catch (err) {
+            console.warn("Geolocation not available", err)
+        }
+
+        const weatherFetch = position
+            ? fetch(`${weatherBaseUrl}?lat=${position.coords.latitude}&lon=${position.coords.longitude}&units=metric`)
+            : fetch(`${weatherBaseUrl}?lat=37.99083&lon=23.6971397&units=metric`)
 
         const results = await Promise.allSettled([
             imageFetch,
