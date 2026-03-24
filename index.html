@@ -2,7 +2,7 @@
 <html lang="en-US">
 
 <head>
-    <meta charset="UTF-8"/>
+    <meta charset="UTF-8" />
     <link rel="stylesheet" href="index.css">
     <title>Personal Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -31,8 +31,14 @@
             <a id="author"></a>
             <section class="history" aria-labelledby="event-heading">
                 <h2 id="event-heading" class="sr-only">Key event that happened in the past on the same day as today</h2>
-                <h2 class="date"></h2>
-                <p class="event"></p>
+                <div class="event-card">
+                    <h2 class="date"></h2>
+                    <p class="event"></p>
+                </div>
+                <div class="history-controls">
+                    <button class="history-btn history-previous" disabled><span>←</span> Previous</button>
+                    <button class="history-btn history-next">Next <span>→</span></button>
+                </div>
             </section>
         </section>
     </main>
