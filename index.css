@@ -8,7 +8,6 @@ body {
     background-size: cover;
     color: white;
     font-family: Arial, Helvetica, sans-serif;
-    text-shadow: 0px 0px 20px #242424;
 }
 
 main {
@@ -17,6 +16,7 @@ main {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    position: relative;
 }
 
 section.top {
@@ -27,10 +27,20 @@ section.top {
 h1.time {
     text-align: center;
     font-size: 5rem;
+    text-shadow: 0px 0px 10px #242424;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 section#crypto {
     font-size: 1.3rem;
+    padding: .2em .5em;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: none;
+    border-radius: 6px;
+    display: none;
 }
 
 section#crypto > p {
@@ -40,7 +50,7 @@ section#crypto > p {
 div#crypto-top {
     display: flex;
     align-items: center;
-    margin-bottom: 5px;
+    margin-bottom: 5px;    
 }
 
 div#crypto-top > span {
@@ -100,14 +110,52 @@ a#author {
 .history > h2 {
     margin: 0;
     margin-bottom: .5em;
-    text-shadow: 0px 0px 20px #242424;
+    font-weight: 800;
 }
 
 .history > p {
     margin: 0;
-    text-shadow: 0px 0px 20px #242424;
     font-size: 1.1rem;
     line-height: 1.2;
+    font-weight: 800;
+}
+
+.history-controls {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin: 0.7em 0 0 0;
+}
+
+.history-btn {
+    background-color: whitesmoke;
+    color: #242424;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: .4em .6em;
+    border: none;
+    border-radius: 6px;
+    display: none;
+}
+
+.history-btn:focus,
+.history-btn:hover {
+    background-color: #e0e0e0;
+    color: #242424;
+    cursor: pointer;    
+}
+
+.history-btn:disabled {      
+    opacity: 0.5;  
+    cursor: not-allowed;    
+}
+
+.event-card {
+    padding: 0 .5em;
+    background-color: rgba(0, 0, 0, 0.2);
+    border: none;
+    border-radius: 6px;
+    display: none;
 }
 
 #loader {

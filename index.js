@@ -7,6 +7,11 @@ import {
 
 const loader = document.querySelector("#loader")
 const mainEl = document.querySelector("main")
+const historyCard = document.querySelector(".event-card")
+const historyPrevBtn = document.querySelector(".history-previous")
+const historyNextBtn = document.querySelector(".history-next")
+const historyDateEl = document.querySelector(".date")
+const historyEventEl = document.querySelector(".event")
 const today = new Date()
 const month = String(today.getMonth() + 1).padStart(2, "0")
 const day = String(today.getDate()).padStart(2, "0")
@@ -14,8 +19,10 @@ const imageUrl = "https://apis.scrimba.com/unsplash/photos/random?orientation=la
 const cryptoUrl = "https://api.coingecko.com/api/v3/coins/dogecoin"
 const historyUrl = `https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/events/${month}/${day}`
 const weatherBaseUrl = "https://apis.scrimba.com/openweathermap/data/2.5/weather"
+let historyEvents = []
+let historyIndex = 0
 
-function hideLoader() { loader.classList.add("hidden"); }
+function hideLoader() { loader.classList.add("hidden") }
 
 function getPosition() {
     return new Promise((resolve, reject) => {
@@ -31,6 +38,48 @@ function loadImage(url) {
         img.src = url
     })
 }
+
+historyNextBtn.addEventListener("click", handleNextClick)
+historyPrevBtn.addEventListener("click", handlePrevClick)
+
+function handleNextClick(e) {
+    e.stopPropagation()
+
+    const atLastItem = historyIndex >= historyEvents.length - 1
+    if (atLastItem) {
+        historyNextBtn.disabled = true
+        return
+    }
+
+    historyIndex++
+
+    historyPrevBtn.disabled = false
+    historyNextBtn.disabled = historyIndex === historyEvents.length - 1
+    renderNewEvent(historyEvents[historyIndex])
+}
+
+
+function handlePrevClick(e) {
+    e.stopPropagation()
+
+    const atFirstItem = historyIndex <= 0
+    if (atFirstItem) {
+        historyPrevBtn.disabled = true
+        return
+    }
+
+    historyIndex--
+
+    historyNextBtn.disabled = false
+    historyPrevBtn.disabled = historyIndex === 0
+    renderNewEvent(historyEvents[historyIndex])
+}
+
+function renderNewEvent(historicEvent) {
+    historyDateEl.textContent = "On this day in: " + historicEvent.year
+    historyEventEl.textContent = historicEvent.text
+}
+
 
 async function loadDashboard() {
     try {
@@ -56,19 +105,19 @@ async function loadDashboard() {
 
         const imageData = imageResOk
             ? await imageRes.value.json()
-            : getBackgroundPlaceholder();
+            : getBackgroundPlaceholder()
 
         const cryptoData = (cryptoRes.status === "fulfilled" && cryptoRes.value.ok)
             ? await cryptoRes.value.json()
-            : getCryptoPlaceholder();
+            : getCryptoPlaceholder()
 
         const weatherData = (weatherRes.status === "fulfilled" && weatherRes.value.ok)
             ? await weatherRes.value.json()
-            : getWeatherPlaceholder();
+            : getWeatherPlaceholder()
 
         const historyData = (historyRes.status === "fulfilled" && historyRes.value.ok)
             ? await historyRes.value.json()
-            : getHistoryPlaceholder();
+            : getHistoryPlaceholder()
 
         if (imageResOk) await loadImage(await imageData.urls.regular)
 
@@ -78,7 +127,7 @@ async function loadDashboard() {
         console.error(err)
     }
     finally {
-        hideLoader();
+        hideLoader()
         mainEl.setAttribute("aria-hidden", "false")
     }
 }
@@ -111,6 +160,7 @@ function render(imageData, cryptoData, weatherData, historyData) {
     const lowerPrice = document.createElement("p")
     lowerPrice.textContent = `👇: $${cryptoData.market_data.low_24h.usd}`
     outerCryptoContainer.append(currentPrice, upperPrice, lowerPrice)
+    outerCryptoContainer.style.display = "block"
 
     const iconUrl = `https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`
     const weatherContainer = document.getElementById("weather")
@@ -128,8 +178,12 @@ function render(imageData, cryptoData, weatherData, historyData) {
     weatherLocation.classList.add("weather-city")
     weatherContainer.append(weatherDesc, weatherIcon, weatherTemp, weatherLocation)
 
-    document.querySelector(".date").textContent = "On this day in: " + historyData.events[0].year
-    document.querySelector(".event").textContent = historyData.events[0].text
+    historyNextBtn.style.display = "block"
+    historyPrevBtn.style.display = "block"
+    historyCard.style.display = "block"
+    historyEvents = historyData.events
+    historyDateEl.textContent = "On this day in: " + historyEvents[historyIndex].year
+    historyEventEl.textContent = historyEvents[historyIndex].text
 
     tick()
 }
