@@ -4,6 +4,7 @@ import {
     getWeatherPlaceholder,
     getHistoryPlaceholder
 } from "./utility/placeholder.js"
+import { violentWords } from "./utility/violentWords.js"
 
 const loader = document.querySelector("#loader")
 const mainEl = document.querySelector("main")
@@ -187,7 +188,10 @@ function render(imageData, cryptoData, weatherData, historyData) {
     historyNextBtn.style.display = "block"
     historyPrevBtn.style.display = "block"
     historyCard.style.display = "block"
-    historyEvents = historyData.events
+    const violentRegEx = new RegExp(`\\b(${violentWords})\\b`, "i");
+    historyEvents = historyData.events.filter((event) => {
+       return !violentRegEx.test(event.text)
+    })
     historyDateEl.textContent = "On this day in: " + historyEvents[historyIndex].year
     historyEventEl.textContent = historyEvents[historyIndex].text
 
