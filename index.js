@@ -8,6 +8,7 @@ import { violentWords } from "./utility/violentWords.js"
 
 const loader = document.querySelector("#loader")
 const mainEl = document.querySelector("main")
+const timeEl = document.querySelector(".time")
 const historyCard = document.querySelector(".event-card")
 const historyPrevBtn = document.querySelector(".history-previous")
 const historyNextBtn = document.querySelector(".history-next")
@@ -200,8 +201,7 @@ function render(imageData, cryptoData, weatherData, historyData) {
 
 function tick() {
     const now = new Date()
-    document.querySelector(".time").textContent =
-        now.toLocaleTimeString("en-us", { timeStyle: "medium" })
+    timeEl.textContent = now.toLocaleTimeString("en-us", { timeStyle: "medium" })
 
     const delay = 1000 - (now.getMilliseconds())
     setTimeout(tick, delay)
