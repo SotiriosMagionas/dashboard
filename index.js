@@ -57,6 +57,7 @@ function handleNextClick(e) {
 
     historyPrevBtn.disabled = false
     historyNextBtn.disabled = historyIndex === historyEvents.length - 1
+    historyNextBtn.blur()
     renderNewEvent(historyEvents[historyIndex])
 }
 
@@ -74,6 +75,7 @@ function handlePrevClick(e) {
 
     historyNextBtn.disabled = false
     historyPrevBtn.disabled = historyIndex === 0
+    historyPrevBtn.blur()
     renderNewEvent(historyEvents[historyIndex])
 }
 
@@ -191,8 +193,8 @@ function render(imageData, cryptoData, weatherData, historyData) {
     historyCard.style.display = "block"
     const violentRegEx = new RegExp(`\\b(${violentWords})\\b`, "i");
     historyEvents = historyData.events.filter((event) => {
-       return !violentRegEx.test(event.text)
-    })
+        return !violentRegEx.test(event.text)
+    }).sort((a, b) => b.year - a.year)
     historyDateEl.textContent = "On this day in: " + historyEvents[historyIndex].year
     historyEventEl.textContent = historyEvents[historyIndex].text
 
