@@ -14,6 +14,8 @@ const historyPrevBtn = document.querySelector(".history-previous")
 const historyNextBtn = document.querySelector(".history-next")
 const historyDateEl = document.querySelector(".date")
 const historyEventEl = document.querySelector(".event")
+const outerCryptoContainer = document.getElementById("crypto")
+const innerCryptoContainer = document.getElementById("crypto-top")
 const today = new Date()
 const month = String(today.getMonth() + 1).padStart(2, "0")
 const day = String(today.getDate()).padStart(2, "0")
@@ -23,16 +25,21 @@ const historyUrl = `https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/eve
 const weatherBaseUrl = "https://apis.scrimba.com/openweathermap/data/2.5/weather"
 let historyEvents = []
 let historyIndex = 0
+historyNextBtn.addEventListener("click", handleNextClick)
+historyPrevBtn.addEventListener("click", handlePrevClick)
+let cryptoPrice = null;
 
 function hideLoader() { loader.classList.add("hidden") }
 
 function getPosition() {
+
     return new Promise((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject)
     })
 }
 
 function loadImage(url) {
+
     return new Promise((resolve, reject) => {
         const img = new Image()
         img.onload = () => resolve(url)
@@ -41,10 +48,8 @@ function loadImage(url) {
     })
 }
 
-historyNextBtn.addEventListener("click", handleNextClick)
-historyPrevBtn.addEventListener("click", handlePrevClick)
-
 function handleNextClick(e) {
+
     e.stopPropagation()
 
     const atLastItem = historyIndex >= historyEvents.length - 1
@@ -61,8 +66,8 @@ function handleNextClick(e) {
     renderNewEvent(historyEvents[historyIndex])
 }
 
-
 function handlePrevClick(e) {
+
     e.stopPropagation()
 
     const atFirstItem = historyIndex <= 0
@@ -80,12 +85,13 @@ function handlePrevClick(e) {
 }
 
 function renderNewEvent(historicEvent) {
+
     historyDateEl.textContent = "On this day in: " + historicEvent.year
     historyEventEl.textContent = historicEvent.text
 }
 
-
 async function loadDashboard() {
+
     try {
         const imageFetch = fetch(imageUrl)
         const cryptoFetch = fetch(cryptoUrl)
@@ -152,25 +158,7 @@ function render(imageData, cryptoData, weatherData, historyData) {
     author.setAttribute("rel", "noopener noreferrer")
     author.setAttribute("target", "_blank")
 
-    const innerCryptoContainer = document.getElementById("crypto-top")
-    innerCryptoContainer.textContent = ""
-    const img = document.createElement("img")
-    img.src = cryptoData.image.small
-    img.alt = "Selected crypto coin icon"
-    const span = document.createElement("span")
-    span.textContent = cryptoData.name
-    innerCryptoContainer.appendChild(img)
-    innerCryptoContainer.appendChild(span)
-
-    const outerCryptoContainer = document.getElementById("crypto")
-    const currentPrice = document.createElement("p")
-    currentPrice.textContent = `🎯: $${cryptoData.market_data.current_price.usd}`
-    const upperPrice = document.createElement("p")
-    upperPrice.textContent = `👆: $${cryptoData.market_data.high_24h.usd}`
-    const lowerPrice = document.createElement("p")
-    lowerPrice.textContent = `👇: $${cryptoData.market_data.low_24h.usd}`
-    outerCryptoContainer.append(currentPrice, upperPrice, lowerPrice)
-    outerCryptoContainer.style.display = "block"
+    renderCrypto(cryptoData)
 
     const iconUrl = `https://openweathermap.org/img/wn/${weatherData.weather[0].icon}@2x.png`
     const weatherContainer = document.getElementById("weather")
@@ -199,14 +187,81 @@ function render(imageData, cryptoData, weatherData, historyData) {
     historyEventEl.textContent = historyEvents[historyIndex].text
 
     tick()
+    refreshCoinData()
 }
 
 function tick() {
+
     const now = new Date()
     timeEl.textContent = now.toLocaleTimeString("en-us", { timeStyle: "medium" })
 
     const delay = 1000 - (now.getMilliseconds())
     setTimeout(tick, delay)
+}
+
+async function refreshCoinData() {
+
+    const now = new Date()
+
+    try {
+        const cryptoFetch = fetch(cryptoUrl)
+        const result = await cryptoFetch
+        if (!result.ok) throw new Error("Response not ok, keep old data for now")
+
+        const data = await result.json()
+        renderCrypto(data)
+
+    } catch (err) {
+        console.error("Error refetching coin data: ", err)
+    }
+
+    const delay = 30000 - (now.getMilliseconds())
+    setTimeout(refreshCoinData, delay)
+}
+
+function renderCrypto(data) {
+
+    innerCryptoContainer.textContent = ""
+    const img = document.createElement("img")
+    img.src = data.image.small
+    img.alt = "Selected crypto coin icon"
+    const span = document.createElement("span")
+    span.textContent = data.name
+    innerCryptoContainer.appendChild(img)
+    innerCryptoContainer.appendChild(span)
+
+    const arrow = document.createElement("img")
+    arrow.className = "arrow"
+    if (data.market_data.current_price.usd > cryptoPrice) {
+        arrow.src = "./assets/images/caret-up.svg"
+        arrow.alt = "arrow pointing up-increase"
+    } else if (data.market_data.current_price.usd < cryptoPrice) {
+        arrow.src = "./assets/images/caret-down.svg"
+        arrow.alt = "arrow pointing down-decrease"
+    } else if (data.market_data.current_price.usd === cryptoPrice) {
+        arrow.src = "./assets/images/caret-right.svg"
+        arrow.alt = "arrow pointing right-no change"
+    }
+
+    const currentPriceContainer = document.createElement("div")
+    currentPriceContainer.className = "current-price-container"
+
+    const currentPriceEl = document.createElement("p")
+    currentPriceEl.textContent = `🎯: $${data.market_data.current_price.usd.toFixed(6)}`
+    currentPriceContainer.innerHTML = ""
+    currentPriceContainer.appendChild(currentPriceEl)
+    if (cryptoPrice != null) currentPriceContainer.appendChild(arrow)
+
+    const upperPriceEl = document.createElement("p")
+    upperPriceEl.textContent = `👆: $${data.market_data.high_24h.usd.toFixed(6)}`
+
+    const lowerPriceEl = document.createElement("p")
+    lowerPriceEl.textContent = `👇: $${data.market_data.low_24h.usd.toFixed(6)}`
+    
+    outerCryptoContainer.innerHTML = ""
+    outerCryptoContainer.append(innerCryptoContainer, currentPriceContainer, upperPriceEl, lowerPriceEl)
+    outerCryptoContainer.style.display = "block"
+    cryptoPrice = data.market_data.current_price.usd;
 }
 
 loadDashboard()
