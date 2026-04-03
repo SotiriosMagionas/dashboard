@@ -233,13 +233,13 @@ function renderCrypto(data) {
     const arrow = document.createElement("img")
     arrow.className = "arrow"
     if (data.market_data.current_price.usd > cryptoPrice) {
-        arrow.src = "./assets/images/caret-up.svg"
+        arrow.src = "./assets/images/arrow-trend-up.svg"
         arrow.alt = "arrow pointing up-increase"
     } else if (data.market_data.current_price.usd < cryptoPrice) {
-        arrow.src = "./assets/images/caret-down.svg"
+        arrow.src = "./assets/images/arrow-trend-down.svg"
         arrow.alt = "arrow pointing down-decrease"
     } else if (data.market_data.current_price.usd === cryptoPrice) {
-        arrow.src = "./assets/images/caret-right.svg"
+        arrow.src = "./assets/images/arrow-right-long.svg"
         arrow.alt = "arrow pointing right-no change"
     }
 
