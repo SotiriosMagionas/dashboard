@@ -9,6 +9,7 @@
     "chrome_url_overrides": {
         "newtab": "index.html"
     },
+    "icons": { "16": "icon.png", "48": "icon.png", "128": "icon.png" },
     "content_security_policy": {
         "extension_pages": "default-src 'self' https://fonts.gstatic.com ; connect-src https://apis.scrimba.com https://api.coingecko.com https://api.wikimedia.org https://api.openweathermap.org; img-src 'self' https://images.unsplash.com https://openweathermap.org https://api.coingecko.com https://coin-images.coingecko.com; script-src 'self'; style-src 'self' https://fonts.googleapis.com ;"
     }
