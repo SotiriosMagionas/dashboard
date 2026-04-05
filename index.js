@@ -5,6 +5,7 @@ import {
     getHistoryPlaceholder
 } from "./utility/placeholder.js"
 import { violentWords } from "./utility/violentWords.js"
+import { coinOptions } from "./utility/coinOptions.js"
 
 const loader = document.querySelector("#loader")
 const mainEl = document.querySelector("main")
@@ -16,11 +17,13 @@ const historyDateEl = document.querySelector(".date")
 const historyEventEl = document.querySelector(".event")
 const outerCryptoContainer = document.getElementById("crypto")
 const innerCryptoContainer = document.getElementById("crypto-top")
+const coinSelect = document.getElementById("coin-select")
+const coinIcon = document.getElementById("coin-icon")
 const today = new Date()
 const month = String(today.getMonth() + 1).padStart(2, "0")
 const day = String(today.getDate()).padStart(2, "0")
 const imageUrl = "https://apis.scrimba.com/unsplash/photos/random?orientation=landscape&query=nature"
-const cryptoUrl = "https://api.coingecko.com/api/v3/coins/dogecoin"
+const cryptoUrl = "https://api.coingecko.com/api/v3/coins/"
 const historyUrl = `https://api.wikimedia.org/feed/v1/wikipedia/en/onthisday/events/${month}/${day}`
 const weatherBaseUrl = "https://apis.scrimba.com/openweathermap/data/2.5/weather"
 let historyEvents = []
@@ -28,6 +31,40 @@ let historyIndex = 0
 historyNextBtn.addEventListener("click", handleNextClick)
 historyPrevBtn.addEventListener("click", handlePrevClick)
 let cryptoPrice = null;
+let selectedCoin = "dogecoin"
+
+function buildCryptoUrl(coinId) {
+    return `${cryptoUrl}${coinId}`
+}
+
+function ensureCoinSelect() {
+    if (!coinSelect) return
+    if (coinSelect.options && coinSelect.options.length) return
+    coinOptions.forEach(opt => {
+        const el = document.createElement("option")
+        el.value = opt.id
+        el.textContent = opt.name
+        if (opt.id === selectedCoin) el.selected = true
+        coinSelect.appendChild(el)
+    })
+    coinSelect.addEventListener("change", async (e) => {
+        selectedCoin = e.target.value
+        cryptoPrice = null
+        await fetchAndRenderCoin()
+    })
+}
+
+async function fetchAndRenderCoin() {
+    try {
+        const res = await fetch(buildCryptoUrl(selectedCoin))
+        if (!res.ok) throw new Error("Response not ok")
+        const data = await res.json()
+        renderCrypto(data)
+    } catch (err) {
+        console.error("Error fetching selected coin:", err)
+        renderCrypto(getCryptoPlaceholder())
+    }
+}
 
 function hideLoader() { loader.classList.add("hidden") }
 
@@ -94,7 +131,7 @@ async function loadDashboard() {
 
     try {
         const imageFetch = fetch(imageUrl)
-        const cryptoFetch = fetch(cryptoUrl)
+        const cryptoFetch = fetch(buildCryptoUrl(selectedCoin))
         const historyFetch = fetch(historyUrl)
 
         let position = null
@@ -204,7 +241,7 @@ async function refreshCoinData() {
     const now = new Date()
 
     try {
-        const cryptoFetch = fetch(cryptoUrl)
+        const cryptoFetch = fetch(buildCryptoUrl(selectedCoin))
         const result = await cryptoFetch
         if (!result.ok) throw new Error("Response not ok, keep old data for now")
 
@@ -221,14 +258,25 @@ async function refreshCoinData() {
 
 function renderCrypto(data) {
 
-    innerCryptoContainer.textContent = ""
-    const img = document.createElement("img")
-    img.src = data.image.small
-    img.alt = "Selected crypto coin icon"
-    const span = document.createElement("span")
-    span.textContent = data.name
-    innerCryptoContainer.appendChild(img)
-    innerCryptoContainer.appendChild(span)
+    Array.from(innerCryptoContainer.children).forEach(child => {
+        if (child.id !== "coin-icon" && child.id !== "coin-select") child.remove()
+    })
+
+    if (coinIcon) {
+        coinIcon.src = data.image?.small || ""
+        coinIcon.alt = `${data.name} icon`
+    } else {
+        const img = document.createElement("img")
+        img.id = "coin-icon"
+        img.src = data.image?.small || ""
+        img.alt = `${data.name} icon`
+        innerCryptoContainer.insertBefore(img, innerCryptoContainer.firstChild)
+    }
+
+    if (coinSelect) {
+        coinSelect.value = data.id || selectedCoin
+        selectedCoin = coinSelect.value
+    }
 
     const arrow = document.createElement("img")
     arrow.className = "arrow"
@@ -257,11 +305,12 @@ function renderCrypto(data) {
 
     const lowerPriceEl = document.createElement("p")
     lowerPriceEl.textContent = `👇: $${data.market_data.low_24h.usd.toFixed(6)}`
-    
+
     outerCryptoContainer.innerHTML = ""
     outerCryptoContainer.append(innerCryptoContainer, currentPriceContainer, upperPriceEl, lowerPriceEl)
     outerCryptoContainer.style.display = "block"
     cryptoPrice = data.market_data.current_price.usd;
 }
 
+ensureCoinSelect()
 loadDashboard()

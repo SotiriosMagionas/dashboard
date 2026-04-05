@@ -22,7 +22,11 @@
         <section class="top">
             <section id="crypto" aria-labelledby="crypto-heading">
                 <h2 id="crypto-heading" class="sr-only">Crypto prices</h2>
-                <div id="crypto-top"></div>
+                <div id="crypto-top">
+                    <img id="coin-icon" src="" alt="Selected crypto coin icon">
+                    <label id="coin-select-label" class="sr-only" for="coin-select">Choose cryptocurrency</label>
+                    <select id="coin-select" aria-labelledby="coin-select-label"></select>
+                </div>
             </section>
             <section id="weather" aria-labelledby="weather-heading">
                 <h2 id="weather-heading" class="sr-only">Live weather information</h2>
