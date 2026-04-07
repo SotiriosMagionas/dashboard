@@ -6,6 +6,7 @@ import {
 } from "./utility/placeholder.js"
 import { violentWords } from "./utility/violentWords.js"
 import { coinOptions } from "./utility/coinOptions.js"
+import { saveSelectedCoin, getSelectedCoin } from "././utility/storage.js"
 
 const loader = document.querySelector("#loader")
 const mainEl = document.querySelector("main")
@@ -32,6 +33,12 @@ historyNextBtn.addEventListener("click", handleNextClick)
 historyPrevBtn.addEventListener("click", handlePrevClick)
 let cryptoPrice = null;
 let selectedCoin = "dogecoin"
+try {
+    selectedCoin = await getSelectedCoin(selectedCoin)
+} catch (err) {
+    console.warn("Could not read selected coin from storage", err)
+}
+
 
 function buildCryptoUrl(coinId) {
     return `${cryptoUrl}${coinId}`
@@ -50,6 +57,11 @@ function ensureCoinSelect() {
     coinSelect.addEventListener("change", async (e) => {
         selectedCoin = e.target.value
         cryptoPrice = null
+        try {
+            await saveSelectedCoin(selectedCoin)
+        } catch (err) {
+            console.warn("Failed to save selected coin", err)
+        }
         await fetchAndRenderCoin()
     })
 }
